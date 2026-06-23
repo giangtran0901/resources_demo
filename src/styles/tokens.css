@@ -1,0 +1,201 @@
+/*
+ * Persona design tokens, extracted from @persona-id/design-tokens.
+ * Core palette is theme-independent; semantic tokens flip for light/dark.
+ */
+:root {
+  /* ----- Core palette ----- */
+  --color-primary-white: #ffffff;
+  --color-primary-black: #000000;
+
+  --color-core-slate-1100: #313131;
+  --color-core-slate-1000: #434343;
+  --color-core-slate-900: #565656;
+  --color-core-slate-800: #707070;
+  --color-core-slate-700: #848484;
+  --color-core-slate-600: #a0a0a0;
+  --color-core-slate-500: #bdbdbd;
+  --color-core-slate-400: #cccccc;
+  --color-core-slate-300: #dbdbdb;
+  --color-core-slate-200: #e2e2e3;
+  --color-core-slate-100: #f1f1f2;
+  --color-core-slate-50: #f5f5f6;
+  --color-core-slate-25: #f9f9fa;
+
+  --color-core-blue-1000: #012862;
+  --color-core-blue-900: #013b93;
+  --color-core-blue-800: #024fc4;
+  --color-core-blue-700: #0263f5;
+  --color-core-blue-600: #2b7ffd;
+  --color-core-blue-400: #8dbafe;
+  --color-core-blue-300: #aacbfe;
+  --color-core-blue-200: #c6ddff;
+  --color-core-blue-100: #e3eeff;
+  --color-core-blue-50: #f1f6ff;
+
+  --color-core-teal-1000: #015c65;
+  --color-core-teal-900: #028a98;
+  --color-core-teal-600: #36ebfd;
+  --color-core-teal-500: #68f0fd;
+  --color-core-teal-300: #b4f8fe;
+  --color-core-teal-200: #cdfaff;
+  --color-core-teal-100: #e6fdff;
+
+  --color-core-green-1000: #114b36;
+  --color-core-green-900: #1a7150;
+  --color-core-green-800: #22966b;
+  --color-core-green-700: #2bbc86;
+  --color-core-green-600: #41d49d;
+  --color-core-green-500: #66dcb1;
+  --color-core-green-300: #a9ecd3;
+  --color-core-green-200: #c6f2e2;
+  --color-core-green-100: #e2f9f0;
+  --color-core-green-50: #f1fcf8;
+
+  --color-core-yellow-1000: #556301;
+  --color-core-yellow-900: #7f9501;
+  --color-core-yellow-800: #a9c602;
+  --color-core-yellow-700: #d3f802;
+  --color-core-yellow-500: #e6fe60;
+  --color-core-yellow-400: #eefe92;
+  --color-core-yellow-300: #f2fead;
+  --color-core-yellow-200: #f7ffc9;
+  --color-core-yellow-100: #fbffe4;
+
+  --color-core-orange-1000: #623c01;
+  --color-core-orange-900: #935a01;
+  --color-core-orange-800: #c47802;
+  --color-core-orange-700: #f59602;
+  --color-core-orange-600: #fdab2b;
+  --color-core-orange-500: #febf5c;
+  --color-core-orange-300: #feddaa;
+  --color-core-orange-200: #ffe9c6;
+  --color-core-orange-100: #fff4e3;
+
+  --color-core-red-1000: #5c0f07;
+  --color-core-red-900: #8a170a;
+  --color-core-red-800: #b81f0e;
+  --color-core-red-700: #e62711;
+  --color-core-red-600: #f04b38;
+  --color-core-red-500: #f47466;
+  --color-core-red-400: #f79e94;
+  --color-core-red-300: #f9b6af;
+  --color-core-red-200: #fbcfca;
+  --color-core-red-100: #fde7e4;
+  --color-core-red-50: #fef3f2;
+
+  --color-core-purple-1000: #010668;
+  --color-core-purple-900: #02099c;
+  --color-core-purple-800: #020cd0;
+  --color-core-purple-700: #0b16fc;
+  --color-core-purple-600: #3f48fd;
+  --color-core-purple-500: #7379fd;
+  --color-core-purple-400: #a7abfe;
+  --color-core-purple-300: #bdc0fe;
+  --color-core-purple-200: #d3d5ff;
+  --color-core-purple-100: #e9eaff;
+  --color-core-purple-50: #f4f5ff;
+
+  /* ----- Type ----- */
+  --font-primary: 'ABC Monument Grotesk', 'Inter', 'Noto Sans', ui-sans-serif, system-ui,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-mono: 'ABC Monument Grotesk Mono', 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, Menlo,
+    Monaco, Consolas, 'Liberation Mono', monospace;
+
+  /* ----- Spacing scale ----- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+  --space-9: 56px;
+
+  /* ----- Radius ----- */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --brand: var(--color-core-purple-600);
+}
+
+/* ----- Light semantic tokens ----- */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-app: var(--color-core-slate-50);
+  --bg-primary: var(--color-primary-white);
+  --bg-secondary: var(--color-core-slate-50);
+  --bg-raised: var(--color-primary-white);
+  --bg-hover: var(--color-core-slate-50);
+  --bg-active: var(--color-core-slate-100);
+  --bg-highlight: var(--color-core-purple-50);
+  --bg-input: var(--color-primary-white);
+  --bg-input-disabled: var(--color-core-slate-100);
+  --bg-segmented: var(--color-core-slate-100);
+
+  --text-primary: var(--color-core-slate-1100);
+  --text-secondary: var(--color-core-slate-800);
+  --text-tertiary: var(--color-core-slate-700);
+  --text-disabled: var(--color-core-slate-500);
+  --text-inverse: var(--color-primary-white);
+  --text-brand: var(--color-core-purple-600);
+
+  --border-hairline: var(--color-core-slate-100);
+  --border-divider: var(--color-core-slate-200);
+  --border-input: var(--color-core-slate-300);
+  --border-input-hover: var(--color-core-slate-500);
+  --border-strong: var(--color-core-slate-300);
+  --border-focus: var(--color-core-blue-600);
+
+  --shadow-sm: 0 1px 2px rgba(49, 49, 49, 0.06), 0 1px 1px rgba(49, 49, 49, 0.04);
+  --shadow-md: 0 4px 12px rgba(49, 49, 49, 0.08), 0 1px 3px rgba(49, 49, 49, 0.06);
+  --shadow-lg: 0 16px 48px rgba(49, 49, 49, 0.16), 0 4px 12px rgba(49, 49, 49, 0.08);
+  --overlay: rgba(49, 49, 49, 0.4);
+
+  --swatch-ring: rgba(0, 0, 0, 0.08);
+  --checker: #e8e8ea;
+}
+
+/* ----- Dark semantic tokens ----- */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-app: #1a1a1a;
+  --bg-primary: #232323;
+  --bg-secondary: #1f1f1f;
+  --bg-raised: #2a2a2a;
+  --bg-hover: #2e2e2e;
+  --bg-active: #383838;
+  --bg-highlight: rgba(115, 121, 253, 0.16);
+  --bg-input: #1f1f1f;
+  --bg-input-disabled: #2a2a2a;
+  --bg-segmented: #1a1a1a;
+
+  --text-primary: #f1f1f2;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #848484;
+  --text-disabled: #707070;
+  --text-inverse: #232323;
+  --text-brand: var(--color-core-purple-400);
+
+  --border-hairline: #333333;
+  --border-divider: #3a3a3a;
+  --border-input: #454545;
+  --border-input-hover: #5a5a5a;
+  --border-strong: #4a4a4a;
+  --border-focus: var(--color-core-blue-600);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.45);
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  --swatch-ring: rgba(255, 255, 255, 0.12);
+  --checker: #3a3a3a;
+
+  --brand: var(--color-core-purple-500);
+}
