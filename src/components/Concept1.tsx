@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../concept.css';
 import { Button, Field, Input, Pill, Sheet, SheetHeader, PrefixInput, Segmented } from './ui';
 import {
   PlusIcon,
   ChevronRightIcon,
+  ChevronDownIcon,
+  SearchIcon,
   LayersIcon,
   AssetIcon,
   ColorIcon,
@@ -124,6 +126,7 @@ export function Concept1() {
   const [activeSetId, setActiveSetId] = useState('set1');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createGroup, setCreateGroup] = useState<CreateGroup | null>(null);
+  const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     'asset-top': true,
     tokens: true,
@@ -134,6 +137,10 @@ export function Concept1() {
   });
 
   const items = ITEMS_BY_SET[activeSetId] ?? [];
+  const q = query.trim().toLowerCase();
+  const visibleItems = q
+    ? items.filter((i) => i.name.toLowerCase().includes(q) || i.key.toLowerCase().includes(q))
+    : items;
   const selected = items.find((i) => i.id === selectedId) ?? null;
   const isSubset = activeSetId === 'subset1';
   const activeSet = activeSetId === 'subset1' ? SUBSET : SETS.find((s) => s.id === activeSetId)!;
@@ -142,6 +149,20 @@ export function Concept1() {
 
   return (
     <div className="c1">
+      <div className="c1-toolbar">
+        <div className="search">
+          <SearchIcon />
+          <input
+            className="input"
+            placeholder="Search resources…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className="c1-toolbar__spacer" />
+        <C1NewResourceButton onCreate={(t) => setCreateGroup(t)} />
+      </div>
+
       <div className={`c1-cols ${selected ? '' : 'c1-cols--noinspector'}`}>
         {/* ---- Left rail ---- */}
         <aside className="c1-rail">
@@ -226,7 +247,7 @@ export function Concept1() {
             {PRESET_TREE.map((node) => {
               if (node.kind === 'type') {
                 const key = node.type === 'asset' ? 'asset-top' : node.type === 'string' ? 'string' : node.type;
-                const groupItems = items.filter((i) => i.type === node.type && topLevelOf(i) === node.type);
+                const groupItems = visibleItems.filter((i) => i.type === node.type && topLevelOf(i) === node.type);
                 return (
                   <PresetGroup
                     key={node.label}
@@ -242,7 +263,7 @@ export function Concept1() {
                 );
               }
               // tokens with sub-groups
-              const tokenItems = items.filter((i) => topLevelOf(i) === 'tokens');
+              const tokenItems = visibleItems.filter((i) => topLevelOf(i) === 'tokens');
               return (
                 <PresetGroup
                   key="tokens"
@@ -329,6 +350,47 @@ export function Concept1() {
   );
 }
 
+/* ---------------- New resource split button ---------------- */
+function C1NewResourceButton({ onCreate }: { onCreate: (g: CreateGroup) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  const opts: { type: CType; icon: React.ReactNode }[] = [
+    { type: 'color', icon: <ColorIcon /> },
+    { type: 'font', icon: <FontIcon /> },
+    { type: 'asset', icon: <AssetIcon /> },
+    { type: 'string', icon: <BracesIcon /> },
+  ];
+  return (
+    <div style={{ position: 'relative' }} ref={ref}>
+      <Button prefix={<PlusIcon />} suffix={<ChevronDownIcon />} onClick={() => setOpen((o) => !o)}>
+        New resource
+      </Button>
+      {open && (
+        <div className="menu">
+          {opts.map((o) => (
+            <button
+              key={o.type}
+              className="menu__item"
+              onClick={() => {
+                setOpen(false);
+                onCreate(o.type);
+              }}
+            >
+              <span className="menu__icon">{o.icon}</span>
+              New {TYPE_LABEL[o.type].toLowerCase()}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* group classification: assets top-level vs assets-under-tokens.
    We treat fonts/colors as tokens; the dedicated "asset.icon.*" goes under Tokens>Assets,
    logos/heroes stay top-level Assets; strings are custom strings. */
@@ -406,10 +468,14 @@ function ItemList({
             onClick={() => onSelect(it.id)}
           >
             <ItemPreview item={it} />
-            <div style={{ minWidth: 0 }}>
+            <div className="c1-item__main">
               <div className="c1-item__name">{it.name}</div>
-              <div className="c1-item__key">resource.{it.key}</div>
+              <div className="c1-item__sub">{it.value}</div>
             </div>
+            <span className="res-key c1-item__key">
+              <span style={{ color: 'var(--text-tertiary)' }}>resource.</span>
+              <b>{it.key}</b>
+            </span>
             <span className="c1-item__spacer" />
             {isSubset &&
               (overridden ? (
@@ -426,20 +492,15 @@ function ItemList({
 
 function ItemPreview({ item }: { item: CItem }) {
   if (item.type === 'color')
-    return <span className="c1-prev" style={{ background: item.value }} />;
+    return (
+      <div className="swatch">
+        <div className="swatch__fill" style={{ background: item.value }} />
+      </div>
+    );
   if (item.type === 'asset')
-    return (
-      <span className="c1-prev c1-prev--asset">
-        {item.fileUrl && <img src={item.fileUrl} alt="" />}
-      </span>
-    );
-  if (item.type === 'font')
-    return (
-      <span className="c1-prev" style={{ background: 'var(--bg-secondary)' }}>
-        Ag
-      </span>
-    );
-  return <span className="c1-prev c1-prev--string">""</span>;
+    return <div className="asset-thumb">{item.fileUrl && <img src={item.fileUrl} alt="" />}</div>;
+  if (item.type === 'font') return <div className="font-preview">Ag</div>;
+  return <div className="c2-strprev">""</div>;
 }
 
 /* ---------------- Inspector ---------------- */
@@ -488,11 +549,11 @@ function Inspector({ item, isSubset, onClear }: { item: CItem; isSubset: boolean
           </div>
         </Field>
 
-        {/* Type (pre-determined) */}
+        {/* Type (locked) */}
         <Field label="Type">
           <div className="c1-locked">
-            {TYPE_LABEL[item.type]} {item.type === 'asset' && '(pre-determined)'}
-            <span className="c1-locked__tag"><LockIcon size={12} /> pre-determined</span>
+            {TYPE_LABEL[item.type]}
+            <span className="c1-locked__tag"><LockIcon size={13} /></span>
           </div>
         </Field>
 
@@ -694,11 +755,11 @@ function ConceptCreatePanel({
           />
         </Field>
 
-        {/* Type (pre-determined when fixed) */}
+        {/* Type (locked) */}
         <Field label="Type">
           <div className="c1-locked">
-            {TYPE_LABEL[type]} {type === 'asset' && '(pre-determined)'}
-            <span className="c1-locked__tag"><LockIcon size={12} /> {fixed ? 'pre-determined' : 'preset'}</span>
+            {TYPE_LABEL[type]}
+            <span className="c1-locked__tag"><LockIcon size={13} /></span>
           </div>
         </Field>
 
