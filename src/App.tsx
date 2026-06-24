@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './app.css';
 import { ResourcesPage, type PageActions } from './components/ResourcesPage';
+import { Concept1 } from './components/Concept1';
 import { ResourceEditor } from './components/ResourceEditor';
 import { ReferencesPanel } from './components/ReferencesPanel';
 import { ArchiveModal } from './components/ArchiveModal';
@@ -12,8 +13,6 @@ import {
   FlowIcon,
   ThemeIcon,
   SettingsIcon,
-  SunIcon,
-  MoonIcon,
   ChevronRightIcon,
 } from './components/ui/Icon';
 import { sets, type Resource, type ResourceType } from './data/resources';
@@ -26,14 +25,10 @@ type Panel =
   | null;
 
 export default function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [singleSetOrg, setSingleSetOrg] = useState(false);
   const [showEmpty, setShowEmpty] = useState(false);
+  const [concept1, setConcept1] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   const actions: PageActions = {
     onCreate: (type) => setPanel({ kind: 'create', type }),
@@ -56,26 +51,36 @@ export default function App() {
           </div>
           <div className="page-head__row">
             <div>
-              <div className="page-title">Resources</div>
+              <div className="page-title">Resources{concept1 ? ' · Concept 1' : ''}</div>
               <div className="page-sub">
-                Define reusable values once and reference them everywhere with{' '}
-                <span className="t-mono" style={{ fontSize: 12 }}>resource.&lt;key&gt;</span>. Colors, fonts, and assets stay in sync across every template, theme, and workflow.
+                {concept1 ? (
+                  <>Preset resource types within customizable sets. Pick a set, fill in preset types, and define each resource in the inspector.</>
+                ) : (
+                  <>
+                    Define reusable values once and reference them everywhere with{' '}
+                    <span className="t-mono" style={{ fontSize: 12 }}>resource.&lt;key&gt;</span>. Colors, fonts, and assets stay in sync across every template, theme, and workflow.
+                  </>
+                )}
               </div>
             </div>
             <DemoControls
-              theme={theme}
-              setTheme={setTheme}
               singleSetOrg={singleSetOrg}
               setSingleSetOrg={setSingleSetOrg}
               showEmpty={showEmpty}
               setShowEmpty={setShowEmpty}
+              concept1={concept1}
+              setConcept1={setConcept1}
             />
           </div>
         </header>
 
-        <div className="page-body">
-          <ResourcesPage actions={actions} singleSetOrg={singleSetOrg} showEmpty={showEmpty} />
-        </div>
+        {concept1 ? (
+          <Concept1 />
+        ) : (
+          <div className="page-body">
+            <ResourcesPage actions={actions} singleSetOrg={singleSetOrg} showEmpty={showEmpty} />
+          </div>
+        )}
       </main>
 
       {panel?.kind === 'create' && (
@@ -138,19 +143,19 @@ function Sidebar() {
 }
 
 function DemoControls({
-  theme,
-  setTheme,
   singleSetOrg,
   setSingleSetOrg,
   showEmpty,
   setShowEmpty,
+  concept1,
+  setConcept1,
 }: {
-  theme: 'light' | 'dark';
-  setTheme: (t: 'light' | 'dark') => void;
   singleSetOrg: boolean;
   setSingleSetOrg: (v: boolean) => void;
   showEmpty: boolean;
   setShowEmpty: (v: boolean) => void;
+  concept1: boolean;
+  setConcept1: (v: boolean) => void;
 }) {
   return (
     <div
@@ -168,19 +173,36 @@ function DemoControls({
       <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-tertiary)' }}>
         Demo controls
       </div>
-      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          {theme === 'light' ? <SunIcon /> : <MoonIcon />} Dark mode
-        </span>
-        <Toggle checked={theme === 'dark'} onChange={(v) => setTheme(v ? 'dark' : 'light')} aria-label="Dark mode" />
+      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 13, fontWeight: 500 }}>
+        <span>Concept 1</span>
+        <Toggle checked={concept1} onChange={setConcept1} aria-label="Concept 1" />
       </label>
-      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
+      <hr className="divider" />
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          fontSize: 13,
+          opacity: concept1 ? 0.4 : 1,
+        }}
+      >
         <span>Single-set org</span>
-        <Toggle checked={singleSetOrg} onChange={setSingleSetOrg} aria-label="Single set org" />
+        <Toggle checked={singleSetOrg} onChange={(v) => !concept1 && setSingleSetOrg(v)} aria-label="Single set org" />
       </label>
-      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          fontSize: 13,
+          opacity: concept1 ? 0.4 : 1,
+        }}
+      >
         <span>Empty state</span>
-        <Toggle checked={showEmpty} onChange={setShowEmpty} aria-label="Empty state" />
+        <Toggle checked={showEmpty} onChange={(v) => !concept1 && setShowEmpty(v)} aria-label="Empty state" />
       </label>
     </div>
   );

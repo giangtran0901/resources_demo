@@ -20,7 +20,7 @@ import {
   resourcesBySet,
   typeMeta,
 } from '../data/resources';
-import { normalizeHex, contrastRatio, contrastGrade, bestTextOn, formatBytes } from '../lib/color';
+import { normalizeHex, bestTextOn, formatBytes } from '../lib/color';
 
 type Mode = 'create' | 'edit';
 
@@ -29,11 +29,6 @@ const TYPE_ICON: Record<ResourceType, React.ReactNode> = {
   font: <FontIcon />,
   asset: <AssetIcon />,
 };
-
-const SUGGESTED_COLORS = [
-  '#3F48FD', '#020CD0', '#0263F5', '#02B8CA', '#2BBC86', '#22966B',
-  '#D3F802', '#F59602', '#F04B38', '#E62711', '#313131', '#FFFFFF',
-];
 
 const FONT_FAMILIES = [
   'ABC Monument Grotesk',
@@ -79,6 +74,7 @@ export function ResourceEditor({
   const isEdit = mode === 'edit';
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [confirmSave, setConfirmSave] = useState(false);
 
   // value state
   const [hex, setHex] = useState(existing?.color?.hex ?? '#3F48FD');
@@ -109,6 +105,26 @@ export function ResourceEditor({
 
   const valueValid = type === 'color' ? !!normalizeHex(hexInput) : type === 'font' ? !!family : !!asset;
   const identityValid = label.trim().length > 0 && keyFormatOk && keyUnique;
+
+  // Has the user actually changed anything in edit mode?
+  const dirty =
+    isEdit &&
+    !!existing &&
+    (label !== existing.label ||
+      (type === 'color' && (normalizeHex(hexInput)?.slice(0, 7) ?? hex) !== existing.color?.hex) ||
+      (type === 'font' &&
+        (family !== existing.font?.family ||
+          Number(weight) !== existing.font?.weight ||
+          (italic ? 'italic' : 'normal') !== existing.font?.style)) ||
+      (type === 'asset' && asset?.url !== existing.asset?.url));
+
+  function handleEditSave() {
+    if (dirty && (existing?.usedBy ?? 0) > 0) {
+      setConfirmSave(true);
+    } else {
+      setDone(true);
+    }
+  }
 
   const totalSteps = 4;
 
@@ -191,7 +207,7 @@ export function ResourceEditor({
             <div>
               <div className="section-label">Value</div>
               <div className="section-help">
-                {type === 'color' && 'Pick a color and fine-tune the hex. Contrast is checked live.'}
+                {type === 'color' && 'Pick a color and fine-tune the hex.'}
                 {type === 'font' && 'Choose family, weight, and style — not a single text box.'}
                 {type === 'asset' && 'Upload first. We validate format and size, and flag duplicates.'}
               </div>
@@ -375,15 +391,39 @@ export function ResourceEditor({
       </div>
 
       {/* footer */}
-      <div className="sheet__foot">
+      <div
+        className="sheet__foot"
+        style={isEdit && confirmSave ? { flexDirection: 'column', alignItems: 'stretch', gap: 12 } : undefined}
+      >
         {isEdit ? (
-          <>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <div style={{ flex: 1 }} />
-            <Button prefix={<CheckIcon />} disabled={!valueValid || !label.trim()} onClick={() => setDone(true)}>
-              Save changes
-            </Button>
-          </>
+          confirmSave ? (
+            <>
+              <div className="callout callout--feature">
+                <span className="callout__icon"><InfoIcon /></span>
+                <span>
+                  <b>Editing the base value cascades.</b> Saving updates{' '}
+                  <b>{existing!.usedBy} consumers</b> across templates, themes, and workflows that
+                  inherit <span className="t-mono">resource.{existing!.key}</span>.
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Button variant="outline" full onClick={() => setConfirmSave(false)}>
+                  Keep editing
+                </Button>
+                <Button full prefix={<CheckIcon />} onClick={() => setDone(true)}>
+                  Save changes
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <div style={{ flex: 1 }} />
+              <Button prefix={<CheckIcon />} disabled={!valueValid || !label.trim() || !dirty} onClick={handleEditSave}>
+                Save changes
+              </Button>
+            </>
+          )
         ) : (
           <>
             {step > 1 ? (
@@ -425,10 +465,6 @@ function ColorEditor({
   onHexInput: (v: string) => void;
 }) {
   const valid = !!normalizeHex(hexInput);
-  const onWhite = contrastRatio(hex, '#FFFFFF');
-  const onDark = contrastRatio(hex, '#313131');
-  const gWhite = contrastGrade(onWhite);
-  const gDark = contrastGrade(onDark);
 
   return (
     <div className="color-stage">
@@ -464,50 +500,6 @@ function ColorEditor({
           </Field>
         </div>
       </div>
-
-      <div>
-        <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 8 }}>Suggested from your palette</div>
-        <div className="swatch-suggest">
-          {SUGGESTED_COLORS.map((c) => (
-            <div key={c} className="swatch-suggest__item" style={{ background: c }} title={c} onClick={() => onPick(c)} />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 8 }}>Contrast</div>
-        <div className="contrast-row">
-          <ContrastChip bg={hex} fg="#FFFFFF" ratio={onWhite} grade={gWhite} label="on white" />
-          <ContrastChip bg={hex} fg="#313131" ratio={onDark} grade={gDark} label="on dark text" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ContrastChip({
-  bg,
-  fg,
-  ratio,
-  grade,
-  label,
-}: {
-  bg: string;
-  fg: string;
-  ratio: number;
-  grade: { label: string; pass: boolean };
-  label: string;
-}) {
-  return (
-    <div className="contrast-chip">
-      <div className="contrast-chip__demo" style={{ background: bg, color: fg, boxShadow: 'inset 0 0 0 1px var(--swatch-ring)' }}>
-        Aa
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 600, fontSize: 13 }}>{ratio.toFixed(2)}:1</div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{label}</div>
-      </div>
-      <Pill type={grade.pass ? 'success' : 'critical'}>{grade.label}</Pill>
     </div>
   );
 }
@@ -660,15 +652,6 @@ function ImpactAndHistory({ existing }: { existing: Resource }) {
   const [showHistory, setShowHistory] = useState(false);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div className="callout callout--feature">
-        <span className="callout__icon"><InfoIcon /></span>
-        <span>
-          <b>Editing the base value cascades.</b> This change updates{' '}
-          <b>{existing.usedBy} consumers</b> across templates, themes, and workflows that inherit{' '}
-          <span className="t-mono">resource.{existing.key}</span>.
-        </span>
-      </div>
-
       <button
         className="btn btn--text btn--sm"
         style={{ alignSelf: 'flex-start', gap: 6 }}

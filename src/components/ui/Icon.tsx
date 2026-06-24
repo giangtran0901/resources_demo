@@ -230,3 +230,17 @@ export const ArrowRightIcon = (p: IconProps) => (
     <path d="M3 8h9.5M9 4.5L12.5 8 9 11.5" />
   </Base>
 );
+
+export const BracesIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M6.2 2.8c-1.4 0-1.6.8-1.6 2.2 0 1.2-.2 2-1.2 2 1 0 1.2.8 1.2 2 0 1.4.2 2.2 1.6 2.2M9.8 2.8c1.4 0 1.6.8 1.6 2.2 0 1.2.2 2 1.2 2-1 0-1.2.8-1.2 2 0 1.4-.2 2.2-1.6 2.2" />
+  </Base>
+);
+
+export const TokensIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M8 2.2l2.4 2.4L8 7 5.6 4.6 8 2.2z" />
+    <rect x="9.4" y="9" width="4.4" height="4.4" rx="1" />
+    <circle cx="5" cy="11.2" r="2.4" />
+  </Base>
+);

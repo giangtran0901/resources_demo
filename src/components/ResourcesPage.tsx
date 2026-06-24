@@ -218,7 +218,6 @@ function ResourceRow({ r, actions }: { r: Resource; actions: PageActions }) {
           <b>{r.key}</b>
         </span>
       </div>
-      <StateTag state={r.state} />
       <span className="res-used">
         <LinkIcon size={13} />
         <b>{r.usedBy}</b> {r.usedBy === 1 ? 'use' : 'uses'}
@@ -314,7 +313,6 @@ function ResourceCard({ r, actions }: { r: Resource; actions: PageActions }) {
       <div>
         <div className="res-card__row">
           <span style={{ fontWeight: 500 }}>{r.label}</span>
-          <StateTag state={r.state} />
         </div>
         <div style={{ marginTop: 6 }}>
           <span className="res-key">
